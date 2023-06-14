@@ -1,81 +1,101 @@
 import e, { Request, Response } from "express"
-import Controller from "./Controller";
-import IRider from "../interfaces/IRider";
-import RiderService from "../services/RiderService";
-import Rider from "../entities/Rider";
+import {send401, send500, sendError, sendResponse} from "./BaseController";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import {jwtSecret} from "../utils/constants";
-import DriverService from "../services/DriverService";
+import User, {UserDocument} from "../models/User";
+import {generateUserJWT} from "../utils/helpers";
 
 
-class AuthController extends Controller {
 
-    public async signUp(req: Request, res: Response): Promise<e.Response> {
-        const data: IRider = req.body;
-        try {
-            const user: Rider | void = data.type == "rider" ? await RiderService.create(data) : DriverService.create(data);
+export const getToken = (req: Request, res: Response) => {
+    const user: Express.User | undefined = req.user;
+    console.log(user)
 
-            return super.sendResponse(
-                res,
-                data.type + ' created.',
-                user,
-                201
-            );
-        } catch (e) {
-            return super.send500(res, e);
-        }
+    if (!user) {
+        return send401(res);
     }
 
-    public async signIn(req: Request, res: Response): Promise<e.Response> {
-        const {email, password, type}: IRider = req.body;
+    const token: string = generateUserJWT(user as UserDocument);
 
-        try {
-            let user: Rider | Rider[] | null | void = type == "rider" ?
-                await RiderService.find({email}, ["email", "type"]) :
-                DriverService.find()
-            ;
-            if (!user) {
-                return super.send401(
-                    res
-                )
-            }
-
-            user = user as Rider;
-            const passwordsMatch: boolean = bcrypt.compareSync(password as string, user.getPassword());
-            if (!passwordsMatch) {
-                return super.send401(
-                    res
-                );
-            }
-
-            const token: string = jwt.sign(
-                {
-                    id: user.id,
-                    user_type: user.type,
-                },
-                jwtSecret,
-                {
-                    expiresIn: '2 days',
-                }
-            );
-
-            const success = {
-                id: user.id,
-                email: user.email,
-                token: token
-            }
-
-            return super.sendResponse(
-                res,
-                "login successful.",
-                success
-            );
-        } catch (e) {
-            console.log(e)
-            return super.send500(res, e);
-        }
-    }
+    return sendResponse(
+        res,
+        'login successful.',
+        {
+            user:{
+                id: (user as UserDocument).id,
+                type: (user as UserDocument).type,
+            },
+            token
+        },
+        200
+    );
 }
 
-export default new AuthController();
+export const signIn = async (req: Request, res: Response) => {
+    const {email, password}: UserDocument = req.body;
+
+    const user: UserDocument | null = await User.findOne({email});
+    if (!user) {
+        return send401(res);
+    }
+
+    const passwordsMatch: boolean = bcrypt.compareSync(password as string, user.password as string);
+    if (!passwordsMatch) {
+        return send401(res);
+    }
+
+    const token: string = generateUserJWT(user);
+
+    return sendResponse(
+        res,
+        'login successful.',
+        {
+            user:{
+                id: user.id,
+                type: user.type,
+            },
+            token
+        },
+        200
+    );
+}
+
+
+export const signUp = async (req: Request, res: Response): Promise<e.Response> => {
+    const data: UserDocument = req.body;
+
+    try {
+        let user: UserDocument | null = await User.findOne({
+                email: data.email
+            },
+            ["email"]
+        );
+
+        if (user) {
+            return sendError(
+                res,
+                "validation error.",
+                ["email already exists."],
+                400
+            )
+        }
+
+        user = await User.create(data);
+
+        const token: string = generateUserJWT(user);
+
+        return sendResponse(
+            res,
+            data.type + ' created.',
+            {
+                user:{
+                    id: user.id,
+                    type: user.type,
+                },
+                token
+            },
+            201
+        );
+    } catch (e) {
+        return send500(res, e);
+    }
+}

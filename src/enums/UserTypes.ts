@@ -1,5 +1,5 @@
 enum UserType {
-    R = "rider",
+    C = "customer",
     D = "driver"
 }
 
