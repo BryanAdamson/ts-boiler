@@ -15,7 +15,7 @@ export type UserDocument = Document & {
     type?: UserType;
     token?: string;
     otp?: {
-        code: string;
+        code: number;
         expiration: Date;
         isValid: boolean;
     };
@@ -40,7 +40,6 @@ const UserSchema = new Schema<UserDocument>({
     phoneNo: {
         type: String,
         unique: true,
-        required: true,
         validate: [
             (v: string) => {
                 return isMobilePhone(v, undefined, {strictMode: true});
@@ -63,8 +62,8 @@ const UserSchema = new Schema<UserDocument>({
     },
     otp: {
         code: {
-            type: String,
-            default: "****",
+            type: Number,
+            default: 1000,
             minLength: 4,
             maxLength: 4,
             required: true

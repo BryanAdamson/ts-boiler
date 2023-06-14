@@ -1,18 +1,17 @@
 import e, {NextFunction, Request, Response} from "express";
-import {Result, ResultFactory, validationResult} from "express-validator";
+import {Result, validationResult} from "express-validator";
+import {sendError} from "../controllers/BaseController";
 
 const validate = (req: Request, res: Response, next: NextFunction): void | e.Response => {
-    const hmValidationResult: ResultFactory<string> = validationResult.withDefaults({
-        formatter: error => error.msg
-    });
 
-    const errors: Result = hmValidationResult(req)
+
+    const errors: Result = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(400).json({
-            success: false,
-            message: "validation error.",
-            error: errors.array()
-        });
+        return sendError(
+            res,
+            "validation error",
+            errors.mapped()
+        );
     }
 
     return next();

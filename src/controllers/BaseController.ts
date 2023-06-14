@@ -19,21 +19,21 @@ export const sendError = (res: Response, message: string, error?: any, code?: nu
 export const send401 = (res: Response): e.Response => {
     return res.status(401).json({
         success: false,
-        message: "unauthorized."
+        message: "unauthorized"
     });
 }
 
 export const send403 = (res: Response): e.Response => {
     return res.status(403).json({
         success: false,
-        message: "forbidden."
+        message: "forbidden"
     });
 }
 
 export const send404 = (res: Response): e.Response => {
     return res.status(404).json({
         success: false,
-        message: "no records found."
+        message: "no records found"
     });
 }
 
@@ -43,6 +43,6 @@ export const send500 = (res: Response, e: any): e.Response => {
     return res.status(500).json({
         success: false,
         error: e,
-        message: e.message || "server error."
+        message: e.message || "server error"
     });
 }

@@ -36,6 +36,7 @@ export const updateMyInfo = async (req: Request, res: Response): Promise<e.Respo
         user.gender = user.gender || data.gender;
 
         await user.save();
+
         const success = {
             id: user.id,
             type : user.type,
