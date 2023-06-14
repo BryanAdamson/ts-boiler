@@ -32,7 +32,7 @@
       "jsonwebtoken": "^9.0.0",
       "mongodb": "^5.2.0",
       "mongoose": "^7.2.4",
-      "passport": "^0.5.3",
+      "passport": "^0.6.0",
       "passport-google-oauth-token": "^1.0.7",
       "passport-google-oauth20": "^2.0.0",
       "passport-local": "^1.0.0",
