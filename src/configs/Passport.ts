@@ -3,6 +3,7 @@ import GoogleOauthTokenStrategy from "passport-google-oauth-token";
 import {googleClientId, googleClientSecret, jwtSecret} from "../utils/constants";
 import User, {UserDocument} from "../models/User";
 import jwt from "jsonwebtoken";
+import {Request} from "express";
 
 // const LocalStrategy = passportLocal.Strategy
 
@@ -11,10 +12,12 @@ passport.use(
         {
             clientID: googleClientId,
             clientSecret: googleClientSecret,
+            passReqToCallback: true,
         },
-        async (accessToken: string, refreshToken: string, profile: any, done: (err?: string | Error | null, user?: any, info?: any) => void) => {
-            const user: UserDocument | null = await User.findOne({googleId: profile?.id});
-            console.log(accessToken)
+        async (req: Request, accessToken: string, refreshToken: string, profile: any, done: (err?: string | Error | null, user?: any, info?: any) => void) => {
+            const user: UserDocument | null = await User.findOne({googleId: req.body.profileId});
+            console.log(accessToken);
+            console.log(profile);
 
             if (!user) {
                 done(new Error("unauthorized"), null);

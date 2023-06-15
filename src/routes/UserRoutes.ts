@@ -1,11 +1,11 @@
 import {Router} from "express";
 import authenticate from "../middleware/authenticate";
-import {getMe, updateMyInfo} from "../controllers/UserController";
+import {getMe, updateMyInfo, startMobileVerification, endMobileVerification} from "../controllers/UserController";
 import validate from "../middleware/validate";
 import {body} from "express-validator";
-import {startMobileVerification} from "../controllers/AuthController";
 
-const router = Router();
+const router: Router = Router();
+
 
 router.get(
     "/me",
@@ -14,7 +14,7 @@ router.get(
 );
 
 router.patch(
-    "/me/info",
+    "/me",
     authenticate,
     [
         body('displayName', "invalid displayName")
@@ -22,43 +22,39 @@ router.patch(
             .isString(),
         body('gender', "invalid gender")
             .optional()
-            .isIn(["male", "female", null]),
+            .isIn(["male", "female"]),
     ],
     validate,
     updateMyInfo
 );
 
-router.post(
-    "/me/locations",
-    authenticate,
-    [
-        body('address', "address is invalid")
-            .exists().withMessage("address is required")
-            .isString(),
-        body('city', "city is invalid")
-            .exists().withMessage("city is required")
-            .isIn(["male", "female", null]),
-        body('name', "name is invalid")
-            .optional()
-            .isString(),
-        body('tankSize', "tankSize is invalid")
-            .optional()
-            .isString(),
-    ],
-    validate,
-    updateMyInfo
-);
-
-router.post(
+router.get(
     "/me/verify-phone",
     authenticate,
     [
         body('phoneNo', "phoneNo is invalid")
-            .exists().withMessage("phoneNo is required")
+            .notEmpty().withMessage("phoneNo is required")
             .isMobilePhone("any"),
     ],
     validate,
     startMobileVerification
 );
+
+router.get(
+    "/me/check-otp",
+    authenticate,
+    [
+        body('otp', "otp is invalid")
+            .notEmpty().withMessage("otp is required")
+            .isNumeric()
+            .isLength({
+                min: 4,
+                max: 4
+            })
+    ],
+    validate,
+    endMobileVerification
+);
+
 
 export default router;

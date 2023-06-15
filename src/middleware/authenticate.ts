@@ -6,13 +6,18 @@ import User, {UserDocument} from "../models/User";
 
 
 const authenticate = async (req: Request, res: Response, next: NextFunction): Promise<e.Response|void> => {
-    const token: string|undefined = req.header('Authorization')?.replace('Bearer ', '');
+    const token: string | undefined = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
         return send401(res);
     }
 
-    const payload: JwtPayload | string = jwt.verify(token, jwtSecret);
-    if (!payload) {
+    let payload: JwtPayload | string;
+    try {
+        payload= jwt.verify(token, jwtSecret);
+        if (!payload) {
+            return send401(res);
+        }
+    } catch (e) {
         return send401(res);
     }
 

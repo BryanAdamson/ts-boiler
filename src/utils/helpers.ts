@@ -74,8 +74,8 @@ export const sendSMS = async (user: UserDocument, body: string) => {
 }
 
 
-export const generateRandomInt = (min: number, max: number): number => {
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
+export const generateRandomInt = (min: number, max: number): string => {
+    return (Math.floor(Math.random() * (max - min + 1) ) + min) + "";
 }
 
 export const addMinutesToDate = (date: Date, minutes: number): Date => {

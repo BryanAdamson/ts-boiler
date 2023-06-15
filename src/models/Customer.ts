@@ -1,4 +1,5 @@
 import mongoose, {Document, ObjectId} from "mongoose";
+import {isLatitude, isLongitude} from "class-validator";
 
 
 const Schema = mongoose.Schema;
@@ -8,6 +9,8 @@ export type LocationDocument = Document & {
     city?: string;
     name?: string;
     tankSize?: string;
+    longitude?: string
+    latitude?: string
 };
 
 export type CustomerDocument = Document & {
@@ -35,6 +38,26 @@ const CustomerSchema = new Schema<CustomerDocument>({
                 type: String,
                 allowNull: true,
                 default: null
+            },
+            longitude: {
+                type: String,
+                required: false,
+                validate: [
+                    (v: string) => {
+                        return isLongitude(v);
+                    },
+                    "invalid longitude"
+                ],
+            },
+            latitude: {
+                type: String,
+                required: false,
+                validate: [
+                    (v: string) => {
+                        return isLatitude(v);
+                    },
+                    "invalid latitude"
+                ],
             }
         }
     ],
@@ -43,9 +66,6 @@ const CustomerSchema = new Schema<CustomerDocument>({
         unique: true,
         ref: "User"
     }
-},
-{
-    _id: false
 });
 
 const Customer = mongoose.model<CustomerDocument>("Customer", CustomerSchema);

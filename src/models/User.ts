@@ -15,7 +15,7 @@ export type UserDocument = Document & {
     type?: UserType;
     token?: string;
     otp?: {
-        code: number;
+        code: string;
         expiration: Date;
         isValid: boolean;
     };
@@ -24,6 +24,8 @@ export type UserDocument = Document & {
 const UserSchema = new Schema<UserDocument>({
     displayName: {
         type: String,
+        allowNull: true,
+        default: null
     },
     email: {
         type: String,
@@ -39,7 +41,6 @@ const UserSchema = new Schema<UserDocument>({
     },
     phoneNo: {
         type: String,
-        unique: true,
         validate: [
             (v: string) => {
                 return isMobilePhone(v, undefined, {strictMode: true});
@@ -60,10 +61,15 @@ const UserSchema = new Schema<UserDocument>({
         enum: UserType,
         default: UserType.C
     },
+    gender: {
+        type: String,
+        enum: ["male", "female"],
+        default: null
+    },
     otp: {
         code: {
-            type: Number,
-            default: 1000,
+            type: String,
+            default: "****",
             minLength: 4,
             maxLength: 4,
             required: true

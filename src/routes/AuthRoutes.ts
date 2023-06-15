@@ -1,18 +1,25 @@
 import {Router} from "express";
-import {body, param, query} from "express-validator";
+import {body, param} from "express-validator";
 import validate from "../middleware/validate";
-import passport from "passport";
-import {forgotPassword, getToken, resetPassword, signIn, signUp} from "../controllers/AuthController";
+import {
+    forgotPassword,
+    resetPassword,
+    signIn,
+    signInWithGoogle,
+    signUp,
+    signUpWithGoogle
+} from "../controllers/AuthController";
 
-const router = Router();
-
-router.get(
-    "/google/token",
-    passport.authenticate("google-oauth-token"),
-    getToken
-);
+const router: Router = Router();
 
 
+// router.get(
+//     "/google/token",
+//     passport.authenticate("google-oauth-token"),
+//     getToken
+// );
+//
+//
 // router.get("/google/callback",
 //     passport.authenticate("google"),
 //     (req: Request, res: Response) => {
@@ -20,42 +27,66 @@ router.get(
 //     }
 // );
 
+router.post('/sign-up/google',
+    [
+        body('profileId', "profileId is invalid")
+            .notEmpty().withMessage("profileId is required")
+            .trim(),
+        body('type', "type is invalid")
+            .optional()
+            .isIn(["customer", "driver"])
+    ],
+    validate,
+    signUpWithGoogle
+);
+
 router.post('/sign-up',
     [
         body('email', "email is invalid")
-            .exists().withMessage("email is required")
+            .notEmpty().withMessage("email is required")
             .isEmail()
             .trim()
             .toLowerCase(),
         body('password', "password is invalid")
-            .exists().withMessage("password is required")
+            .notEmpty().withMessage("password is required")
             .isStrongPassword()
             .trim(),
         body('passwordConfirmation', "passwordConfirmation is invalid.")
-            .exists().withMessage("passwordConfirmation is required.")
+            .notEmpty().withMessage("passwordConfirmation is required.")
             .isStrongPassword()
             .custom((value, { req}): boolean => {
                 return value === req.body.password;
             })
             .trim(),
         body('type', "type is invalid")
-            .exists().withMessage("type is required")
+            .optional()
             .isIn(["customer", "driver"])
     ],
     validate,
     signUp
 );
 
+router.post('/sign-in/google',
+    [
+        body('profileId', "profileId is invalid")
+            .notEmpty().withMessage("profileId is required")
+            .isString()
+            .trim()
+    ],
+    validate,
+    signInWithGoogle
+);
+
 router.post(
     '/sign-in',
     [
         body('email', "email is invalid")
-            .exists().withMessage("email is required")
+            .notEmpty().withMessage("email is required")
             .isEmail()
             .trim()
             .toLowerCase(),
         body('password', "password is invalid")
-            .exists().withMessage("password is required")
+            .notEmpty().withMessage("password is required")
             .isStrongPassword()
             .trim()
     ],
@@ -66,13 +97,13 @@ router.post(
 router.get(
     '/forgot-password',
     [
-        query('email', "email is invalid")
-            .exists().withMessage("email is required")
+        body('email', "email is invalid")
+            .notEmpty().withMessage("email is required")
             .isEmail()
             .trim()
             .toLowerCase(),
-        query('redirectUrl', "redirectUrl is invalid")
-            .exists().withMessage("redirectUrl is required")
+        body('redirectUrl', "redirectUrl is invalid")
+            .notEmpty().withMessage("redirectUrl is required")
             .isString()
             .trim()
             .toLowerCase()
@@ -85,14 +116,14 @@ router.post(
     '/reset-password/:token',
     [
         param('token', "token is invalid")
-            .exists().withMessage("token is required")
+            .notEmpty().withMessage("token is required")
             .isJWT(),
         body('password', "password is invalid")
-            .exists().withMessage("password is required")
+            .notEmpty().withMessage("password is required")
             .isStrongPassword()
             .trim(),
         body('passwordConfirmation', "passwordConfirmation is invalid.")
-            .exists().withMessage("passwordConfirmation is required.")
+            .notEmpty().withMessage("passwordConfirmation is required.")
             .isStrongPassword()
             .custom((value, { req}): boolean => {
                 return value === req.body.password;

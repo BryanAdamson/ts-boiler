@@ -8,11 +8,11 @@ export const sendResponse = (res: Response, message: string, data?: any, code?: 
     });
 }
 
-export const sendError = (res: Response, message: string, error?: any, code?: number): e.Response => {
+export const sendError = (res: Response, message?: string, error?: any, code?: number): e.Response => {
     return res.status(code||400).json({
         success: false,
         error: error,
-        message: message
+        message: message || "validation error"
     });
 }
 

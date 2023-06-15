@@ -2,9 +2,12 @@ import e, { Request, Response } from "express"
 import {send401, send404, send500, sendError, sendResponse} from "./BaseController";
 import bcrypt from "bcrypt";
 import User, {UserDocument} from "../models/User";
-import {addMinutesToDate, generateRandomInt, generateUserJWT, sendMail, sendSMS} from "../utils/helpers";
+import {generateUserJWT, sendMail} from "../utils/helpers";
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {jwtSecret} from "../utils/constants";
+import {googleClientId, googleClientSecret, jwtSecret} from "../utils/constants";
+import {LoginTicket, OAuth2Client, TokenPayload} from "google-auth-library";
+import Customer from "../models/Customer";
+import Driver from "../models/Driver";
 
 
 
@@ -28,6 +31,28 @@ export const getToken = (req: Request, res: Response): e.Response => {
     );
 }
 
+export const signInWithGoogle = async (req: Request, res: Response): Promise<e.Response> => {
+    const {profileId} = req.body;
+
+    let user: UserDocument | null = await User.findOne({googleId: profileId});
+    if (!user) {
+        return send401(res);
+    }
+
+    return sendResponse(
+        res,
+        'signin successful',
+        {
+            user:{
+                id: user.id,
+                type: user.type,
+            },
+            token: generateUserJWT(user)
+        },
+        200
+    );
+}
+
 export const signIn = async (req: Request, res: Response): Promise<e.Response> => {
     const {email, password}: UserDocument = req.body;
 
@@ -43,7 +68,7 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
 
     return sendResponse(
         res,
-        'login successful',
+        'signin successful',
         {
             user:{
                 id: user.id,
@@ -55,26 +80,88 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
     );
 }
 
+export const signUpWithGoogle = async (req: Request, res: Response): Promise<e.Response> => {
+    const {profileId, type} = req.body;
+
+    let user: UserDocument | null = await User.findOne({googleId: profileId});
+    if (user) {
+        return send401(res);
+    }
+
+    const google: OAuth2Client = new OAuth2Client(googleClientId, googleClientSecret);
+
+    const googleUser: LoginTicket = await google.verifyIdToken({
+        idToken: profileId,
+        audience: googleClientId,
+    });
+
+    const googleUserPayload: TokenPayload | undefined = googleUser.getPayload();
+    if (!googleUserPayload) {
+        return send401(res);
+    }
+
+    user = await User.findOne({email: googleUserPayload.email}, ["type"]);
+    if (user) {
+        return send401(res);
+    }
+
+    try {
+        user = await User.create({
+            email: googleUserPayload.email,
+            googleId: profileId,
+            displayName: googleUserPayload.email,
+            type: type || "customer",
+        });
+
+        type === "driver" ? await Driver.create({user: user.id}) : await Customer.create({user: user.id});
+
+        return sendResponse(
+            res,
+            'signup successful',
+            {
+                user:{
+                    id: user.id,
+                    type: user.type,
+                },
+                token: generateUserJWT(user)
+            },
+            200
+        );
+    } catch (e) {
+        return send500(res, e);
+    }
+
+
+}
+
 export const signUp = async (req: Request, res: Response): Promise<e.Response> => {
     const data: UserDocument = req.body;
 
+    let user: UserDocument | null = await User.findOne({
+            email: data.email
+        },
+        ["email"]
+    );
+
+    if (user) {
+        return sendError(
+            res,
+            undefined,
+            {
+                email: {
+                    type: "field",
+                    msg: "email is taken",
+                    path: "email",
+                    location: "body"
+                }
+            }
+        )
+    }
+
     try {
-        let user: UserDocument | null = await User.findOne({
-                email: data.email
-            },
-            ["email"]
-        );
-
-        if (user) {
-            return sendError(
-                res,
-                "validation error",
-                ["email already exists"],
-                400
-            )
-        }
-
         user = await User.create(data);
+
+        data.type === "driver" ? await Driver.create({user: user.id}) : await Customer.create({user: user.id});
 
         return sendResponse(
             res,
@@ -94,15 +181,23 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
 }
 
 export const forgotPassword = async (req: Request, res: Response): Promise<e.Response> => {
-    const { email, redirectUrl } = req.query ;
+    const { email, redirectUrl } = req.body ;
 
     const user: UserDocument | null = await User.findOne({email});
     if (!user) {
         return send404(res);
     }
+    if (user.googleId) {
+        return sendError(
+            res,
+            "user has google authentication",
+            null,
+            400
+        )
+    }
 
-    const token: string = generateUserJWT(user, '15 minutes');
-    const url: string = redirectUrl + token;
+    const resetToken: string = generateUserJWT(user, '15 minutes');
+    const url: string = redirectUrl + resetToken;
 
 
     try {
@@ -112,7 +207,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<e.Res
             res,
             "reset email sent",
             {
-                token
+                resetToken
             }
         );
     } catch (e) {
@@ -124,9 +219,25 @@ export const resetPassword = async (req: Request, res: Response): Promise<e.Resp
     const { password } = req.body;
     const { token } = req.params;
 
-    const payload: JwtPayload | string = jwt.verify(token, jwtSecret);
-    if (!payload) {
-        return send401(res);
+    let payload: JwtPayload | string;
+    try {
+        payload= jwt.verify(token, jwtSecret);
+        if (!payload) {
+            return send401(res);
+        }
+    } catch (e) {
+        return sendError(
+            res,
+            undefined,
+            {
+                resetToken: {
+                    type: "parameter",
+                    msg: "resetToken is invalid",
+                    path: "resetToken",
+                    location: "path"
+                }
+            }
+        );
     }
 
     const user: UserDocument | null = await User.findById((payload as UserDocument).id);
@@ -148,33 +259,6 @@ export const resetPassword = async (req: Request, res: Response): Promise<e.Resp
                 },
                 token: generateUserJWT(user)
             },
-        );
-    } catch (e) {
-        return send500(res, e);
-    }
-}
-
-export const startMobileVerification = async (req: Request, res: Response): Promise<e.Response> => {
-    const user: UserDocument = req.user as UserDocument;
-    const { phoneNo } = req.body;
-
-    const code: number = generateRandomInt(1000, 9999);
-    const expiration: Date = addMinutesToDate(new Date(), 5);
-
-    try {
-        user.otp = {
-            code,
-            expiration,
-            isValid: true
-        };
-        user.phoneNo = phoneNo;
-        await user.save();
-
-        await sendSMS(user, "Your otp is " + code);
-
-        return sendResponse(
-            res,
-            "sent OTP to user",
         );
     } catch (e) {
         return send500(res, e);

@@ -6,6 +6,8 @@ import "./configs/Passport";
 import passport from "passport";
 import ErrorRoutes from "./routes/ErrorRoutes";
 import session from "express-session";
+import UserRoutes from "./routes/UserRoutes";
+import CustomerRoutes from "./routes/CustomerRoutes";
 
 const app: Express = express();
 
@@ -27,8 +29,10 @@ mongoose.connect(mongoURI, {})
     .catch(e => console.error(e));
 
 
-app.use("/", ErrorRoutes);
+app.use("/api/errors", ErrorRoutes);
 app.use("/api/auth", AuthRoutes);
+app.use("/api/users", UserRoutes);
+app.use("/api/customers", CustomerRoutes);
 
 
 app.listen(port, () => {
