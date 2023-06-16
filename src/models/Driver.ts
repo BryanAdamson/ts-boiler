@@ -1,21 +1,13 @@
 import mongoose, {Document, ObjectId} from "mongoose";
 import {isLatitude, isLongitude} from "class-validator";
+import {LocationDocument} from "./User";
 
 
 const Schema = mongoose.Schema;
 
-export type DLocationDocument = Document & {
-    address?: string;
-    city?: string;
-    name?: string;
-    tankSize?: string;
-    longitude?: string
-    latitude?: string
-};
-
 export type DriverDocument = Document & {
     user?: ObjectId
-    location?: DLocationDocument;
+    location?: LocationDocument;
 };
 
 const DriverSchema = new Schema<DriverDocument>({
@@ -44,6 +36,7 @@ const DriverSchema = new Schema<DriverDocument>({
     user: {
         type: mongoose.Types.ObjectId,
         unique: true,
+        required: true,
         ref: "User"
     }
 });

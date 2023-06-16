@@ -40,6 +40,7 @@
       "passport-google-oauth20": "^2.0.0",
       "passport-local": "^1.0.0",
       "reflect-metadata": "^0.1.13",
+      "ts-migrate-mongoose": "^3.1.7",
       "twilio": "^4.11.2"
    },
    "scripts": {

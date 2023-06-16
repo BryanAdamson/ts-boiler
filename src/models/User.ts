@@ -1,9 +1,19 @@
 import mongoose, { Document } from "mongoose";
-import UserType from "../enums/UserTypes";
+import UserType from "../enums/UserType";
 import bcrypt from "bcrypt";
 import {isEmail, isMobilePhone} from "class-validator";
 
+
 const Schema = mongoose.Schema;
+
+export type LocationDocument = Document & {
+    address?: string;
+    city?: string;
+    name?: string;
+    tankSize?: string;
+    longitude?: string
+    latitude?: string
+};
 
 export type UserDocument = Document & {
     displayName?: string;
@@ -41,6 +51,8 @@ const UserSchema = new Schema<UserDocument>({
     },
     phoneNo: {
         type: String,
+        allowNull: true,
+        default: null,
         validate: [
             (v: string) => {
                 return isMobilePhone(v, undefined, {strictMode: true});

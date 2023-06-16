@@ -1,5 +1,4 @@
 import {Router} from "express";
-import authenticate from "../middleware/authenticate";
 import {getMe, updateMyInfo, startMobileVerification, endMobileVerification} from "../controllers/UserController";
 import validate from "../middleware/validate";
 import {body} from "express-validator";
@@ -9,13 +8,11 @@ const router: Router = Router();
 
 router.get(
     "/me",
-    authenticate,
     getMe
 );
 
 router.patch(
     "/me",
-    authenticate,
     [
         body('displayName', "invalid displayName")
             .optional()
@@ -30,7 +27,6 @@ router.patch(
 
 router.get(
     "/me/verify-phone",
-    authenticate,
     [
         body('phoneNo', "phoneNo is invalid")
             .notEmpty().withMessage("phoneNo is required")
@@ -42,7 +38,6 @@ router.get(
 
 router.get(
     "/me/check-otp",
-    authenticate,
     [
         body('otp', "otp is invalid")
             .notEmpty().withMessage("otp is required")

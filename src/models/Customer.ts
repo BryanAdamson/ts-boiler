@@ -1,17 +1,9 @@
 import mongoose, {Document, ObjectId} from "mongoose";
 import {isLatitude, isLongitude} from "class-validator";
+import {LocationDocument} from "./User";
 
 
 const Schema = mongoose.Schema;
-
-export type LocationDocument = Document & {
-    address?: string;
-    city?: string;
-    name?: string;
-    tankSize?: string;
-    longitude?: string
-    latitude?: string
-};
 
 export type CustomerDocument = Document & {
     user?: ObjectId
@@ -41,7 +33,7 @@ const CustomerSchema = new Schema<CustomerDocument>({
             },
             longitude: {
                 type: String,
-                required: false,
+                required: true,
                 validate: [
                     (v: string) => {
                         return isLongitude(v);
@@ -51,7 +43,7 @@ const CustomerSchema = new Schema<CustomerDocument>({
             },
             latitude: {
                 type: String,
-                required: false,
+                required: true,
                 validate: [
                     (v: string) => {
                         return isLatitude(v);
@@ -64,6 +56,7 @@ const CustomerSchema = new Schema<CustomerDocument>({
     user: {
         type: mongoose.Types.ObjectId,
         unique: true,
+        required: true,
         ref: "User"
     }
 });

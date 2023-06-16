@@ -8,6 +8,10 @@ import ErrorRoutes from "./routes/ErrorRoutes";
 import session from "express-session";
 import UserRoutes from "./routes/UserRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
+import OrderRoutes from "./routes/OrderRoutes";
+import customers from "./middleware/customers";
+import authenticate from "./middleware/authenticate";
+
 
 const app: Express = express();
 
@@ -31,8 +35,10 @@ mongoose.connect(mongoURI, {})
 
 app.use("/api/errors", ErrorRoutes);
 app.use("/api/auth", AuthRoutes);
-app.use("/api/users", UserRoutes);
-app.use("/api/customers", CustomerRoutes);
+app.use("/api/users", authenticate, UserRoutes);
+app.use("/api/customers", authenticate, customers, CustomerRoutes);
+app.use("/api/orders", authenticate, customers, OrderRoutes);
+
 
 
 app.listen(port, () => {

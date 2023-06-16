@@ -1,17 +1,14 @@
 import {Router} from "express";
-import authenticate from "../middleware/authenticate";
-import customers from "../middleware/customers";
 import {addMyLocations, getMyLocations, updateMyLocation} from "../controllers/CustomerController";
 import validate from "../middleware/validate";
 import {body, param} from "express-validator";
 import mongoose from "mongoose";
+import {isLatitude, isLongitude} from "class-validator";
 
 const router: Router = Router();
 
 
 router.post('/me/locations',
-    authenticate,
-    customers,
     [
         body('address', "address is invalid")
             .notEmpty().withMessage("address is required")
@@ -37,14 +34,10 @@ router.post('/me/locations',
 )
 
 router.get('/me/locations',
-    authenticate,
-    customers,
     getMyLocations
 )
 
 router.get('/me/locations/:locationId',
-    authenticate,
-    customers,
     [
         param('locationId', "locationId is invalid")
             .custom(value => mongoose.isValidObjectId(value)),
@@ -62,10 +55,10 @@ router.get('/me/locations/:locationId',
             .isNumeric(),
         body('latitude', "latitude is invalid")
             .optional()
-            .isFloat(),
+            .custom(value => isLatitude(value)),
         body('longitude', "longitude is invalid")
             .optional()
-            .isFloat(),
+            .custom(value => isLongitude(value)),
     ],
     validate,
     updateMyLocation

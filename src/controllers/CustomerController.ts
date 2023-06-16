@@ -1,6 +1,6 @@
 import e, {Request, Response} from "express";
-import Customer, {CustomerDocument, LocationDocument} from "../models/Customer";
-import {UserDocument} from "../models/User";
+import Customer, {CustomerDocument} from "../models/Customer";
+import {UserDocument, LocationDocument} from "../models/User";
 import {send404, send500, sendResponse} from "./BaseController";
 
 export const addMyLocations = async (req: Request, res: Response): Promise<e.Response> => {

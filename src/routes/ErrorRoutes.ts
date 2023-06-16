@@ -13,12 +13,14 @@ router.get(
             {
                 fieldName1: {
                     type: "someType",
+                    value: "someValue",
                     msg: "fieldName1 is invalid",
                     path: "fieldName1",
                     location: "someLocation"
                 },
                 fieldName2: {
                     type: "someType",
+                    value: "someValue",
                     msg: "fieldName2 is invalid",
                     path: "fieldName2",
                     location: "someLocation"
