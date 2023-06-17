@@ -21,7 +21,9 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true },
-    store: new MongoStore({})
+    store: new MongoStore({
+        mongoUrl: mongoURI
+    })
 }));
 
 app.use(express.urlencoded({ extended: false }));
