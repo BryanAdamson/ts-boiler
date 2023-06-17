@@ -25,7 +25,7 @@ router.patch(
     updateMyInfo
 );
 
-router.get(
+router.post(
     "/me/verify-phone",
     [
         body('phoneNo', "phoneNo is invalid")

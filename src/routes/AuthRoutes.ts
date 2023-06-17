@@ -94,7 +94,7 @@ router.post(
     signIn
 );
 
-router.get(
+router.post(
     '/forgot-password',
     [
         body('email', "email is invalid")
