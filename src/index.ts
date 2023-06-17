@@ -11,6 +11,7 @@ import CustomerRoutes from "./routes/CustomerRoutes";
 import OrderRoutes from "./routes/OrderRoutes";
 import customers from "./middleware/customers";
 import authenticate from "./middleware/authenticate";
+import MongoStore from "connect-mongo";
 
 
 const app: Express = express();
@@ -19,7 +20,8 @@ app.use(session({
     secret: cookieSecret,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { secure: true },
+    store: new MongoStore({})
 }));
 
 app.use(express.urlencoded({ extended: false }));
