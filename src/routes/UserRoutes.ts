@@ -36,7 +36,7 @@ router.get(
     startMobileVerification
 );
 
-router.get(
+router.post(
     "/me/check-otp",
     [
         body('otp', "otp is invalid")
