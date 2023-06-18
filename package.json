@@ -44,7 +44,7 @@
       "twilio": "^4.11.2"
    },
    "scripts": {
-      "start": "tsc && node dist/index.js",
+      "start": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && tsc && node dist/index.js",
       "dev": "nodemon -w *.ts -w .env --exec 'ts-node' src/index.ts",
       "typeorm": "typeorm-ts-node-commonjs"
    }

@@ -1,46 +1,46 @@
 import passport from "passport";
-import GoogleOauthTokenStrategy from "passport-google-oauth-token";
-import {googleClientId, googleClientSecret, jwtSecret} from "../utils/constants";
+// import GoogleOauthTokenStrategy from "passport-google-oauth-token";
+// import {googleClientId, googleClientSecret, jwtSecret} from "../utils/constants";
 import User, {UserDocument} from "../models/User";
-import jwt from "jsonwebtoken";
-import {Request} from "express";
+// import jwt from "jsonwebtoken";
+// import {Request} from "express";
 
 
 // const LocalStrategy = passportLocal.Strategy
 
-passport.use(
-    new GoogleOauthTokenStrategy(
-        {
-            clientID: googleClientId,
-            clientSecret: googleClientSecret,
-            passReqToCallback: true,
-        },
-        async (req: Request, accessToken: string, refreshToken: string, profile: any, done: (err?: string | Error | null, user?: any, info?: any) => void) => {
-            const user: UserDocument | null = await User.findOne({googleId: req.body.profileId});
-            console.log(accessToken);
-            console.log(profile);
-
-            if (!user) {
-                done(new Error("unauthorized"), null);
-            } else {
-                user.token = jwt.sign(
-                    {
-                        id: user.id,
-                        user_type: user.type,
-                    },
-                    jwtSecret,
-                    {
-                        expiresIn: '1000 days',
-                    }
-                );
-
-                console.log(user);
-                done(null, user);
-            }
-        }
-    )
-);
-
+// passport.use(
+//     new GoogleOauthTokenStrategy(
+//         {
+//             clientID: googleClientId,
+//             clientSecret: googleClientSecret,
+//             passReqToCallback: true,
+//         },
+//         async (req: Request, accessToken: string, refreshToken: string, profile: any, done: (err?: string | Error | null, user?: any, info?: any) => void) => {
+//             const user: UserDocument | null = await User.findOne({googleId: req.body.profileId});
+//             console.log(accessToken);
+//             console.log(profile);
+//
+//             if (!user) {
+//                 done(new Error("unauthorized"), null);
+//             } else {
+//                 user.token = jwt.sign(
+//                     {
+//                         id: user.id,
+//                         user_type: user.type,
+//                     },
+//                     jwtSecret,
+//                     {
+//                         expiresIn: '1000 days',
+//                     }
+//                 );
+//
+//                 console.log(user);
+//                 done(null, user);
+//             }
+//         }
+//     )
+// );
+//
 
 // passport.use(
 //     new LocalStrategy(
