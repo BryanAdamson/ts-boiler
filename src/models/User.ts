@@ -54,8 +54,8 @@ const UserSchema = new Schema<UserDocument>({
         allowNull: true,
         default: null,
         validate: [
-            (v: string) => {
-                return isMobilePhone(v, undefined, {strictMode: true});
+            (v: string|null) => {
+                return isMobilePhone(v, undefined, {strictMode: true}) || !v;
             },
             "invalid phoneNo"
         ],
@@ -75,7 +75,8 @@ const UserSchema = new Schema<UserDocument>({
     },
     gender: {
         type: String,
-        enum: ["male", "female"],
+        enum: ["male", "female", null],
+        allowNull: true,
         default: null
     },
     otp: {
