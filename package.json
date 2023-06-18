@@ -44,7 +44,7 @@
       "twilio": "^4.11.2"
    },
    "scripts": {
-      "start": "ts-node src/index.ts",
+      "start": "tsc node dist/index.js",
       "dev": "nodemon -w *.ts -w .env --exec 'ts-node' src/index.ts",
       "typeorm": "typeorm-ts-node-commonjs"
    }
