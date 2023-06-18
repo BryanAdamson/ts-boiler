@@ -1,5 +1,5 @@
 import express, {Express} from "express";
-import {mongoURI, port} from "./utils/constants";
+import {cookieSecret, mongoURI, port} from "./utils/constants";
 import mongoose from "mongoose";
 import AuthRoutes from "./routes/AuthRoutes";
 import "./configs/Passport";
@@ -10,6 +10,7 @@ import CustomerRoutes from "./routes/CustomerRoutes";
 import OrderRoutes from "./routes/OrderRoutes";
 import customers from "./middleware/customers";
 import authenticate from "./middleware/authenticate";
+import session from "express-session";
 
 
 const app: Express = express();
@@ -17,6 +18,7 @@ const app: Express = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.use(session({ secret: cookieSecret })); // session secret
 app.use(passport.initialize());
 app.use(passport.session());
 
