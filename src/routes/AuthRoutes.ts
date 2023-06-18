@@ -51,13 +51,6 @@ router.post('/sign-up',
             .notEmpty().withMessage("password is required")
             .isStrongPassword()
             .trim(),
-        body('passwordConfirmation', "passwordConfirmation is invalid.")
-            .notEmpty().withMessage("passwordConfirmation is required.")
-            .isStrongPassword()
-            .custom((value, { req}): boolean => {
-                return value === req.body.password;
-            })
-            .trim(),
         body('type', "type is invalid")
             .optional()
             .isIn(["customer", "driver"])
