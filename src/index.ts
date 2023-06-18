@@ -11,17 +11,22 @@ import OrderRoutes from "./routes/OrderRoutes";
 import customers from "./middleware/customers";
 import authenticate from "./middleware/authenticate";
 import session from "express-session";
-
+import createMemoryStore from "memorystore";
 
 const app: Express = express();
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+const MemoryStore = createMemoryStore(session)
+
 app.use(session({
     secret: cookieSecret,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: new MemoryStore({
+        checkPeriod: 86400000
+    })
 }));
 app.use(passport.initialize());
 app.use(passport.session());

@@ -32,6 +32,7 @@
       "google-auth-library": "^8.8.0",
       "googleapis": "^118.0.0",
       "jsonwebtoken": "^9.0.0",
+      "memorystore": "^1.6.7",
       "mongodb": "^5.2.0",
       "mongoose": "^7.2.4",
       "nodemailer": "^6.9.3",
