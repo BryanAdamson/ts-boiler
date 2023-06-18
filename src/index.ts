@@ -18,7 +18,10 @@ const app: Express = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use(session({ secret: cookieSecret })); // session secret
+app.use(session({
+    secret: cookieSecret,
+    resave: false,
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
