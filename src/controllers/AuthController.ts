@@ -161,7 +161,12 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
     try {
         user = await User.create(data);
 
-        data.type === "driver" ? await Driver.create({user: user.id}) : await Customer.create({user: user.id});
+        if (data.type === "driver") {
+            await Driver.create({user: user.id});
+        }
+        if (data.type === "customer") {
+            await Customer.create({user: user.id});
+        }
 
         return sendResponse(
             res,
