@@ -4,8 +4,7 @@ import bcrypt from "bcrypt";
 import User, {UserDocument} from "../models/User";
 import {generateUserJWT, sendMail} from "../utils/helpers";
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {googleClientId, googleClientSecret, jwtSecret} from "../utils/constants";
-import {LoginTicket, OAuth2Client, TokenPayload} from "google-auth-library";
+import {jwtSecret} from "../utils/constants";
 import Customer from "../models/Customer";
 import Driver from "../models/Driver";
 
@@ -81,39 +80,32 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
 }
 
 export const signUpWithGoogle = async (req: Request, res: Response): Promise<e.Response> => {
-    const {profileId, type} = req.body;
+    const {email, displayName, profileId, type} = req.body;
 
     let user: UserDocument | null = await User.findOne({googleId: profileId});
     if (user) {
         return send401(res);
     }
 
-    const google: OAuth2Client = new OAuth2Client(googleClientId, googleClientSecret);
-
-    const googleUser: LoginTicket = await google.verifyIdToken({
-        idToken: profileId,
-        audience: googleClientId,
-    });
-
-    const googleUserPayload: TokenPayload | undefined = googleUser.getPayload();
-    if (!googleUserPayload) {
-        return send401(res);
-    }
-
-    user = await User.findOne({email: googleUserPayload.email}, ["type"]);
+    user = await User.findOne({email}, ["type"]);
     if (user) {
         return send401(res);
     }
 
     try {
         user = await User.create({
-            email: googleUserPayload.email,
+            email: email,
             googleId: profileId,
-            displayName: googleUserPayload.email,
+            displayName: displayName,
             type: type || "customer",
         });
 
-        type === "driver" ? await Driver.create({user: user.id}) : await Customer.create({user: user.id});
+        if (type === "driver") {
+            await Driver.create({user: user.id});
+        }
+        if (type === "customer") {
+            await Customer.create({user: user.id});
+        }
 
         return sendResponse(
             res,

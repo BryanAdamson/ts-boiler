@@ -32,6 +32,14 @@ router.post('/sign-up/google',
         body('profileId', "profileId is invalid")
             .notEmpty().withMessage("profileId is required")
             .trim(),
+        body('email', "email is invalid")
+            .notEmpty().withMessage("email is required")
+            .isEmail()
+            .trim()
+            .toLowerCase(),
+        body('displayName', "displayName is invalid")
+            .notEmpty().withMessage("displayName is required")
+            .trim(),
         body('type', "type is invalid")
             .optional()
             .isIn(["customer", "driver"])
