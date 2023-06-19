@@ -8,7 +8,9 @@ const Schema = mongoose.Schema;
 export type OrderDocument = Document & {
     customer?: {
         id: ObjectId;
-        deliveryLocation: string[];
+        longitude: string;
+        latitude: string;
+        friendPhone?: string;
     };
     driver?: ObjectId;
     size?: string;
@@ -22,31 +24,28 @@ const OrderSchema = new Schema<OrderDocument>({
     customer: {
         id: {
             type: mongoose.Types.ObjectId,
-            unique: true,
             required: true,
             ref: "User"
         },
-        deliveryLocation: {
-            longitude: {
-                type: String,
-                required: true,
-                validate: [
-                    (v: string) => {
-                        return isLongitude(v);
-                    },
-                    "invalid longitude"
-                ],
-            },
-            latitude: {
-                type: String,
-                required: true,
-                validate: [
-                    (v: string) => {
-                        return isLatitude(v);
-                    },
-                    "invalid latitude"
-                ],
-            }
+        longitude: {
+            type: String,
+            required: true,
+            validate: [
+                (v: string) => {
+                    return isLongitude(v);
+                },
+                "invalid longitude"
+            ],
+        },
+        latitude: {
+            type: String,
+            required: true,
+            validate: [
+                (v: string) => {
+                    return isLatitude(v);
+                },
+                "invalid latitude"
+            ],
         },
         friendPhone: {
             type: String,
@@ -54,15 +53,14 @@ const OrderSchema = new Schema<OrderDocument>({
             default: null,
             validate: [
                 (v: string) => {
-                    return isMobilePhone(v, undefined, {strictMode: true});
+                    return isMobilePhone(v, undefined, {strictMode: true}) || !v;
                 },
-                "invalid phoneNo"
+                "invalid friendPhone"
             ],
         }
     },
     driver: {
         type: mongoose.Types.ObjectId,
-        unique: true,
         required: true,
         ref: "User"
     },
@@ -88,6 +86,12 @@ const OrderSchema = new Schema<OrderDocument>({
         enum: OrderType,
         default: OrderType.P
     }
+});
+
+OrderSchema.set('toJSON', {
+    virtuals: true,
+    versionKey:false,
+    transform: function (doc, ret) {   delete ret._id  }
 });
 
 const Order = mongoose.model<OrderDocument>("Order", OrderSchema);

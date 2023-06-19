@@ -35,7 +35,7 @@ export const addMyLocations = async (req: Request, res: Response): Promise<e.Res
 export const getMyLocations = async (req: Request, res: Response): Promise<e.Response> => {
     const user: UserDocument = req.user as UserDocument;
 
-    const customer: CustomerDocument | null = await Customer.findOne({user: user.id});
+    const customer: CustomerDocument | null = await Customer.findOne({user: user.id}, ["locations"]);
     if (!customer) {
         return send404(res);
     }

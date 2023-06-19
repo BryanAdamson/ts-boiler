@@ -3,7 +3,7 @@ enum OrderStatus {
     CO = "completed",
     ON = "ongoing",
     PE = "pending",
-    AC = "accepted"
+    RE = "rejected"
 }
 
 export default OrderStatus;

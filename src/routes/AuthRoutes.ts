@@ -53,7 +53,7 @@ router.post('/sign-up',
             .trim(),
         body('type', "type is invalid")
             .optional()
-            .isIn(["customer", "driver"])
+            .isIn(["customer", "driver", "admin"])
     ],
     validate,
     signUp

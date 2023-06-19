@@ -123,26 +123,3 @@ export const endMobileVerification = async (req: Request, res: Response): Promis
         return send500(res, e);
     }
 }
-
-
-export const getUser = async (req: Request, res: Response): Promise<e.Response> => {
-    const user: UserDocument | null = await User.findById(req.params.id);
-    if (!user) {
-        return send404(res);
-    }
-
-    const success = {
-        id: user.id,
-        displayName: user.displayName,
-        email : user.email,
-        gender : user.gender,
-        type : user.type,
-        phoneNo : user.phoneNo,
-    }
-
-    return sendResponse(
-        res,
-        'user fetched.',
-        success
-    )
-}

@@ -27,6 +27,7 @@ export const generateUserJWT = (user: UserDocument, duration?: string): string =
         },
         jwtSecret,
         {
+            issuer: "AquayarAuthDev",
             expiresIn: duration || '1000 days',
         }
     );

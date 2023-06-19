@@ -29,6 +29,7 @@ export type UserDocument = Document & {
         expiration: Date;
         isValid: boolean;
     };
+    isSuspended: boolean;
 };
 
 const UserSchema = new Schema<UserDocument>({
@@ -97,7 +98,17 @@ const UserSchema = new Schema<UserDocument>({
             allowNull: false,
             default: false
         }
+    },
+    isSuspended: {
+        type: Boolean,
+        default: false
     }
+});
+
+UserSchema.set('toJSON', {
+    virtuals: true,
+    versionKey:false,
+    transform: function (doc, ret) {   delete ret._id  }
 });
 
 const User = mongoose.model<UserDocument>("User", UserSchema);

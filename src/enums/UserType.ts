@@ -1,6 +1,7 @@
 enum UserType {
     C = "customer",
-    D = "driver"
+    D = "driver",
+    A = "admin"
 }
 
 export default UserType;
