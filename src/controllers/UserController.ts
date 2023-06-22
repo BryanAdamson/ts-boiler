@@ -68,7 +68,7 @@ export const startMobileVerification = async (req: Request, res: Response): Prom
         user.phoneNo = phoneNo as string;
         await user.save();
 
-        await sendSMS(user, "Your otp is " + code);
+        await sendSMS(user, "Your OTP is " + code);
 
         return sendResponse(
             res,
@@ -87,7 +87,7 @@ export const endMobileVerification = async (req: Request, res: Response): Promis
     if (!user?.otp?.isValid) {
         return sendError(res);
     }
-    if (user?.otp?.code !== otp || user?.otp?.expiration.getTime() < new Date().getTime()) {
+    if (user?.otp?.code != otp || user?.otp?.expiration.getTime() < new Date().getTime()) {
         return sendError(
             res,
             "validation error",

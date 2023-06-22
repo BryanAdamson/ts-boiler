@@ -7,8 +7,10 @@ import {
     signIn,
     signInWithGoogle,
     signUp,
-    signUpWithGoogle
+    signUpWithGoogle,
+    verifyOTP
 } from "../controllers/AuthController";
+
 
 const router: Router = Router();
 
@@ -103,14 +105,24 @@ router.post(
             .isEmail()
             .trim()
             .toLowerCase(),
-        body('redirectUrl', "redirectUrl is invalid")
-            .notEmpty().withMessage("redirectUrl is required")
-            .isString()
-            .trim()
-            .toLowerCase()
     ],
     validate,
     forgotPassword
+);
+
+router.post(
+    "/verify-otp",
+    [
+        body('otp', "otp is invalid")
+            .notEmpty().withMessage("otp is required")
+            .isNumeric()
+            .isLength({
+                min: 4,
+                max: 4
+            })
+    ],
+    validate,
+    verifyOTP
 );
 
 router.post(

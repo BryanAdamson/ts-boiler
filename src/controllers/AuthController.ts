@@ -2,7 +2,7 @@ import e, { Request, Response } from "express"
 import {send401, send404, send500, sendError, sendResponse} from "./BaseController";
 import bcrypt from "bcrypt";
 import User, {UserDocument} from "../models/User";
-import {generateUserJWT, sendMail} from "../utils/helpers";
+import {addMinutesToDate, generateRandomInt, generateUserJWT, sendSMS} from "../utils/helpers";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {jwtSecret} from "../utils/constants";
 import Customer from "../models/Customer";
@@ -178,9 +178,9 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
 }
 
 export const forgotPassword = async (req: Request, res: Response): Promise<e.Response> => {
-    const { email, redirectUrl } = req.body ;
+    const { email } = req.body ;
 
-    const user: UserDocument | null = await User.findOne({email});
+    const user: UserDocument | null = await User.findOne({email}, ["phoneNo", "otp"]);
     if (!user) {
         return send404(res);
     }
@@ -193,18 +193,65 @@ export const forgotPassword = async (req: Request, res: Response): Promise<e.Res
         )
     }
 
-    const resetToken: string = generateUserJWT(user, '15 minutes');
-    const url: string = redirectUrl + resetToken;
-
+    const code: string = generateRandomInt(1000, 9999);
+    const expiration: Date = addMinutesToDate(new Date(), 15);
 
     try {
-        await sendMail(user, 'Reset password', `Click <a href = '${url}'>here</a> to reset your password.`)
+        user.otp = {
+            code,
+            expiration,
+            isValid: true
+        };
+        await user.save();
+
+        await sendSMS(user, "Your OTP is " + code);
 
         return sendResponse(
             res,
-            "reset email sent",
+            "sent OTP to user"
+        );
+    } catch (e) {
+        return send500(res, e);
+    }
+}
+
+export const verifyOTP = async (req: Request, res: Response): Promise<e.Response> => {
+    const {otp} = req.body;
+
+    const user: UserDocument | null = await User.findOne({"otp.code": otp});
+
+    if (!user?.otp?.isValid || !user) {
+        return sendError(res);
+    }
+    if (user?.otp?.expiration.getTime() < new Date().getTime()) {
+        return sendError(
+            res,
+            "validation error",
             {
-                resetToken
+                otp: {
+                    type: "field",
+                    value: otp,
+                    msg: "expired",
+                    path: "otp",
+                    location: "body"
+                }
+            }
+        );
+    }
+
+    try {
+        user.otp = {
+            code: "****",
+            expiration: new Date(),
+            isValid: false
+        };
+        await user.save();
+
+        return sendResponse(
+            res,
+            "verified OTP",
+            {
+                resetToken: generateUserJWT(user)
             }
         );
     } catch (e) {
