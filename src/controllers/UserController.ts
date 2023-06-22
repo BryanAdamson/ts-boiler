@@ -33,6 +33,7 @@ export const updateMyInfo = async (req: Request, res: Response): Promise<e.Respo
     try {
         user.displayName = user.displayName || data.displayName;
         user.gender = user.gender || data.gender;
+        user.password = user.password || data.password;
 
         await user.save();
 

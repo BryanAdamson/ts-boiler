@@ -20,6 +20,14 @@ router.patch(
         body('gender', "invalid gender")
             .optional()
             .isIn(["male", "female"]),
+        body('password', "invalid password")
+            .optional()
+            .isStrongPassword(),
+        body('passwordConfirmation', "passwordConfirmation is invalid")
+            .if(body('password').notEmpty())
+            .custom((value, { req}): boolean => {
+                return value === req.body.password;
+            })
     ],
     validate,
     updateMyInfo

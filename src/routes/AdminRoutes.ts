@@ -1,7 +1,7 @@
 import {Router} from "express";
-import {getUsers, reinstateUser, suspendUser} from "../controllers/AdminController";
+import {getUsers, reinstateUser, sendUserEmail, suspendUser, updateUser} from "../controllers/AdminController";
 import validate from "../middleware/validate";
-import {param} from "express-validator";
+import {body, param} from "express-validator";
 import mongoose from "mongoose";
 
 const router: Router = Router();
@@ -34,5 +34,43 @@ router.post('/users/:id/reinstate',
     validate,
     reinstateUser
 )
+
+router.post('/users/:id/mails',
+    [
+        param('id', "invalid id")
+            .custom(value => mongoose.isValidObjectId(value)),
+        body('subject', "subject is invalid")
+            .notEmpty().withMessage("subject is required")
+            .isString(),
+        body('body', "body is invalid")
+            .notEmpty().withMessage("body is required")
+            .isString(),
+    ],
+    validate,
+    sendUserEmail
+)
+
+router.patch(
+    "/users/:id",
+    [
+        body('displayName', "invalid displayName")
+            .optional()
+            .isString(),
+        body('gender', "invalid gender")
+            .optional()
+            .isIn(["male", "female"]),
+        body('email', "invalid email")
+            .optional()
+            .isEmail(),
+        body('phoneNo', "invalid phoneNo")
+            .optional()
+            .isMobilePhone("any"),
+        body('password', "invalid password")
+            .optional()
+            .isStrongPassword(),
+    ],
+    validate,
+    updateUser
+);
 
 export default router;

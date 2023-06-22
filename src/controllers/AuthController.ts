@@ -1,5 +1,5 @@
 import e, { Request, Response } from "express"
-import {send401, send404, send500, sendError, sendResponse} from "./BaseController";
+import {send401, send403, send404, send500, sendError, sendResponse} from "./BaseController";
 import bcrypt from "bcrypt";
 import User, {UserDocument} from "../models/User";
 import {addMinutesToDate, generateRandomInt, generateUserJWT, sendSMS} from "../utils/helpers";
@@ -37,6 +37,9 @@ export const signInWithGoogle = async (req: Request, res: Response): Promise<e.R
     if (!user) {
         return send401(res);
     }
+    if (user.isSuspended) {
+        return send403(res)
+    }
 
     return sendResponse(
         res,
@@ -58,6 +61,9 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
     const user: UserDocument | null = await User.findOne({email});
     if (!user) {
         return send401(res);
+    }
+    if (user.isSuspended) {
+        return send403(res)
     }
 
     const passwordsMatch: boolean = bcrypt.compareSync(password as string, user.password as string);
@@ -184,6 +190,9 @@ export const forgotPassword = async (req: Request, res: Response): Promise<e.Res
     if (!user) {
         return send404(res);
     }
+    if (user.isSuspended) {
+        return send403(res)
+    }
     if (user.googleId) {
         return sendError(
             res,
@@ -287,6 +296,9 @@ export const resetPassword = async (req: Request, res: Response): Promise<e.Resp
     const user: UserDocument | null = await User.findById((payload as UserDocument).id);
     if (!user) {
         return send401(res);
+    }
+    if (user.isSuspended) {
+        return send403(res)
     }
 
     try {

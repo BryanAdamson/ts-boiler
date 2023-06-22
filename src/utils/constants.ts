@@ -13,15 +13,10 @@ export const cookieSecret: string = "HiReMeInCiiCNiwxnowd8*83eu*8239U#*(#*d" +
     "lipd]63882$@*(@&*W)BryanRocksJ*#*DJ#(#(jsiiwoqhoxUDHHDW@**DId2q0c9j"
 
 
-export const env: string | undefined = process.env.NODE_ENV;
 export const port: number = (process.env.PORT || 3000) as number;
 
 
 export const mongoURI: string = process.env.MIGRATE_MONGO_URI as string;
-
-
-export const googleClientId: string = process.env.GOOGLE_CLIENT_ID as string;
-export const googleClientSecret: string  = process.env.GOOGLE_CLIENT_SECRET as string;
 
 
 export const smtpHost: any = process.env.SMTP_HOST;

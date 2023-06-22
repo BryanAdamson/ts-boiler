@@ -5,6 +5,7 @@ import {send404, send500, sendResponse} from "./BaseController";
 import Customer, {CustomerDocument} from "../models/Customer";
 import {DriverDocument} from "../models/Driver";
 import Order, {OrderDocument} from "../models/Order";
+import {sendMail} from "../utils/helpers";
 
 export const getUsers = async (req: Request, res: Response) => {
     const fields: string[] = ["displayName", "email", "gender", "type", "phoneNo", "isSuspended"];
@@ -65,8 +66,8 @@ export const getUsers = async (req: Request, res: Response) => {
 }
 
 export const suspendUser = async (req: Request, res: Response): Promise<e.Response> => {
-    const user: UserDocument | null = await User.findById(req.params.id,["displayName", "email", "gender", "type", "phoneNo", "isSuspended"]);
-    if (!user) {
+    const user: UserDocument | null = await User.findById(req.params.id,["type", "isSuspended"]);
+    if (!user || user.type === UserType.A) {
         return send404(res);
     }
 
@@ -84,8 +85,8 @@ export const suspendUser = async (req: Request, res: Response): Promise<e.Respon
 }
 
 export const reinstateUser = async (req: Request, res: Response): Promise<e.Response> => {
-    const user: UserDocument | null = await User.findById(req.params.id,["displayName", "email", "gender", "type", "phoneNo", "isSuspended"]);
-    if (!user) {
+    const user: UserDocument | null = await User.findById(req.params.id,["type", "isSuspended"]);
+    if (!user || user.type === UserType.A) {
         return send404(res);
     }
 
@@ -100,4 +101,61 @@ export const reinstateUser = async (req: Request, res: Response): Promise<e.Resp
     } catch (e) {
         return send500(res, e);
     }
+}
+
+export const sendUserEmail = async (req: Request, res: Response): Promise<e.Response> => {
+    const {id} = req.params;
+
+    const user: UserDocument | null = await User.findById(id);
+    if (!user || user.type === UserType.A) {
+        return send404(res);
+    }
+
+    const {subject, body} = req.body;
+
+    try {
+        await sendMail(user, subject, body);
+
+        return sendResponse(
+            res,
+            "sent email to user"
+        );
+    } catch (e) {
+        return send500(res, e);
+    }
+}
+
+export const updateUser = async (req: Request, res: Response): Promise<e.Response> => {
+    const {id} = req.params;
+
+    const user: UserDocument | null = await User.findById(id);
+    if (!user) {
+        return send404(res);
+    }
+
+    const data: UserDocument = req.body;
+
+    try {
+        user.displayName = user.displayName || data.displayName;
+        user.gender = user.gender || data.gender;
+        user.email = user.email || data.email;
+        user.phoneNo = user.phoneNo || data.phoneNo;
+        user.password = user.password || data.password;
+
+        await user.save();
+
+        const success = {
+            id: user.id,
+            type : user.type,
+        }
+
+        return sendResponse(
+            res,
+            'user updated',
+            success
+        )
+    } catch (e) {
+        return send500(res, e);
+    }
+
 }
