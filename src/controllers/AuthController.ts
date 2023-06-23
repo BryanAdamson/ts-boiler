@@ -184,10 +184,10 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
 }
 
 export const forgotPassword = async (req: Request, res: Response): Promise<e.Response> => {
-    const { email } = req.body ;
+    const { email } = req.body;
 
     const user: UserDocument | null = await User.findOne({email}, ["phoneNo", "otp"]);
-    if (!user) {
+    if (!user || !user.phoneNo) {
         return send404(res);
     }
     if (user.isSuspended) {
