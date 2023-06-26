@@ -1,7 +1,6 @@
 import mongoose, {Document, ObjectId} from "mongoose";
 import OrderStatus from "../enums/OrderStatus";
-import OrderType from "../enums/OrderType";
-import {isLatitude, isLongitude, isMobilePhone} from "class-validator";
+import {isLatitude, isLongitude} from "class-validator";
 
 const Schema = mongoose.Schema;
 
@@ -10,14 +9,12 @@ export type OrderDocument = Document & {
         id: ObjectId;
         longitude: string;
         latitude: string;
-        friendPhone?: string;
     };
     driver?: ObjectId;
     size?: string;
-    price?: string;
+    price?: number;
     distance?: string;
     status?: OrderStatus;
-    type?: OrderType;
 };
 
 const OrderSchema = new Schema<OrderDocument>({
@@ -47,17 +44,6 @@ const OrderSchema = new Schema<OrderDocument>({
                 "invalid latitude"
             ],
         },
-        friendPhone: {
-            type: String,
-            allowNull: true,
-            default: null,
-            validate: [
-                (v: string) => {
-                    return isMobilePhone(v, undefined, {strictMode: true}) || !v;
-                },
-                "invalid friendPhone"
-            ],
-        }
     },
     driver: {
         type: mongoose.Types.ObjectId,
@@ -81,11 +67,6 @@ const OrderSchema = new Schema<OrderDocument>({
         enum: OrderStatus,
         default: OrderStatus.PE
     },
-    type: {
-        type: String,
-        enum: OrderType,
-        default: OrderType.P
-    }
 });
 
 OrderSchema.set('toJSON', {

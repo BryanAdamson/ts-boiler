@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import * as process from "process";
 dotenv.config()
 
 export const jwtSecret: string = "HiReMeInCiiCNiwxnowd8*83eu*8239U#*(#*d" +
@@ -30,3 +31,6 @@ export const smtpSender: string | undefined = process.env.SMTP_SENDER;
 export const twilioAccountSid: string | undefined = process.env.TWILIO_ACCOUNT_SID;
 export const twilioAuthToken: string | undefined = process.env.TWILIO_AUTH_TOKEN;
 export const twilioNumber: string | undefined = process.env.TWILIO_PHONE_NUMBER;
+
+
+export const aquayarPercentage: number = process.env.AQUAYAR_PERCENTAGE as unknown as number

@@ -1,6 +1,6 @@
 import e, {Request, Response} from "express";
 import Order, {OrderDocument} from "../models/Order";
-import {send404, send500, sendError, sendResponse} from "./BaseController";
+import {send403, send404, send500, sendError, sendResponse} from "./BaseController";
 import Driver, {DriverDocument} from "../models/Driver";
 import {UserDocument} from "../models/User";
 import OrderStatus from "../enums/OrderStatus";
@@ -37,7 +37,6 @@ export const createOrder = async (req: Request, res: Response): Promise<e.Respon
             size: data.size,
             price: data.price,
             distance: data.distance,
-            type: data.type || "personal",
         });
 
         return sendResponse(
@@ -138,14 +137,22 @@ export const completeOrder = async (req: Request, res: Response): Promise<e.Resp
         return send404(res);
     }
 
+    const driver: DriverDocument | null = await Driver.findOne({user: (req.user as UserDocument).id})
+    if (!driver) {
+        return send403(res);
+    }
+
     try {
         order.status = OrderStatus.CO;
         await order.save();
 
+        driver.balance = (driver.balance as number) + (order.price as number);
+        await driver.save();
+
         return sendResponse(
             res,
-            "order canceled"
-        )
+            "order completed"
+        );
     } catch (e) {
         return send500(res, e);
     }

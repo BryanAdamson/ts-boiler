@@ -8,6 +8,8 @@ const Schema = mongoose.Schema;
 export type DriverDocument = Document & {
     user?: ObjectId
     location?: LocationDocument;
+    balance?: number;
+
 };
 
 const DriverSchema = new Schema<DriverDocument>({
@@ -33,12 +35,17 @@ const DriverSchema = new Schema<DriverDocument>({
             ],
         }
     },
+    balance: {
+        type: Number,
+        required: false,
+        default: 0.00
+    },
     user: {
         type: mongoose.Types.ObjectId,
         unique: true,
         required: true,
         ref: "User"
-    }
+    },
 });
 
 const Driver = mongoose.model<DriverDocument>("Driver", DriverSchema);
