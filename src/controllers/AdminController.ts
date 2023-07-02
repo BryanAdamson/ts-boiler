@@ -3,9 +3,10 @@ import User, {UserDocument} from "../models/User";
 import UserType from "../enums/UserType";
 import {send404, send500, sendResponse} from "./BaseController";
 import Customer, {CustomerDocument} from "../models/Customer";
-import {DriverDocument} from "../models/Driver";
+import Driver, {DriverDocument} from "../models/Driver";
 import Order, {OrderDocument} from "../models/Order";
 import {sendMail} from "../utils/helpers";
+import {aquayarPercentage} from "../utils/constants";
 
 export const getUsers = async (req: Request, res: Response) => {
     const fields: string[] = ["displayName", "email", "gender", "type", "phoneNo", "isSuspended"];
@@ -31,13 +32,8 @@ export const getUsers = async (req: Request, res: Response) => {
         return send404(res);
     }
 
-    let user;
+    let user: any;
     if (!(users instanceof Array)) {
-        let temp: CustomerDocument | DriverDocument | null = null;
-        if (users.type === UserType.C) {
-            temp = await Customer.findOne({user: users.id}, ["locations"]);
-        }
-
         const orders: OrderDocument[] | null = await Order.find({
             $or: [
                 {"customer.id": users.id},
@@ -53,8 +49,28 @@ export const getUsers = async (req: Request, res: Response) => {
             type: users.type,
             phoneNo: !users.otp?.isValid ? users.phoneNo : null,
             isSuspended: users.isSuspended,
-            locations: (temp as CustomerDocument).locations,
-            orders: orders
+            orders: orders,
+            auxInfo: {}
+        }
+
+        let temp: CustomerDocument | DriverDocument | null = null;
+        if (users.type === UserType.C) {
+            temp = await Customer.findOne({user: users.id}, ["locations"]);
+            user.auxInfo = {
+                locations: (temp as CustomerDocument).locations
+            };
+        }
+
+        if (users.type === UserType.D) {
+            temp = await Driver.findOne({user: users.id}, ["location", "balance", "kyc"]);
+
+            const debitBalance: number = ((temp as DriverDocument).balance as number) * (aquayarPercentage/100);
+
+            user.auxInfo = {
+                kyc: (temp as DriverDocument).kyc,
+                debitBalance: debitBalance,
+                availableBalance: ((temp as DriverDocument).balance as number) - debitBalance
+            };
         }
     }
 

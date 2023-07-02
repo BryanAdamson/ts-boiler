@@ -157,7 +157,10 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
     }
 
     try {
-        user = await User.create(data);
+        user = await User.create({
+            ...data,
+            isSuspended: data.type === "driver"
+        });
 
         if (data.type === "driver") {
             await Driver.create({user: user.id});

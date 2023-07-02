@@ -9,7 +9,10 @@ export type DriverDocument = Document & {
     user?: ObjectId
     location?: LocationDocument;
     balance?: number;
-
+    kyc: {
+        license?: string;
+        identification?: string;
+    }
 };
 
 const DriverSchema = new Schema<DriverDocument>({
@@ -39,6 +42,16 @@ const DriverSchema = new Schema<DriverDocument>({
         type: Number,
         required: false,
         default: 0.00
+    },
+    kyc: {
+        license: {
+            type: String,
+            required: false,
+        },
+        identification: {
+            type: String,
+            required: false,
+        }
     },
     user: {
         type: mongoose.Types.ObjectId,
