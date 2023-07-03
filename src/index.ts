@@ -16,6 +16,7 @@ import admins from "./middleware/admins";
 import AdminRoutes from "./routes/AdminRoutes";
 import DriverRoutes from "./routes/DriverRoutes";
 import drivers from "./middleware/drivers";
+import BaseRoutes from "./routes/BaseRoutes";
 
 const app: Express = express();
 
@@ -46,6 +47,8 @@ app.use("/api/users", authenticate, UserRoutes);
 app.use("/api/customers", authenticate, customers, CustomerRoutes);
 app.use("/api/drivers", authenticate, drivers, DriverRoutes);
 app.use("/api/orders", authenticate, OrderRoutes);
+
+app.use("/", BaseRoutes)
 
 app.use("/api/admins", authenticate, admins, AdminRoutes);
 

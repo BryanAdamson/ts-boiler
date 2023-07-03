@@ -35,6 +35,11 @@ export const twilioNumber: string | undefined = process.env.TWILIO_PHONE_NUMBER;
 
 export const aquayarPercentage: number = process.env.AQUAYAR_PERCENTAGE as unknown as number
 
+
 export const cloudinaryCloudName: string | undefined = process.env.CLOUDINARY_CLOUD_NAME;
 export const cloudinaryApiKey: string | undefined = process.env.CLOUDINARY_API_KEY;
 export const cloudinaryApiSecret: string | undefined = process.env.CLOUDINARY_API_SECRET;
+
+
+export const paystackSecretKey: string | undefined = process.env.PAYSTACK_SECRET_KEY
+export const paystackPublicKey: string | undefined = process.env.PAYSTACK_PUBLIC_KEY

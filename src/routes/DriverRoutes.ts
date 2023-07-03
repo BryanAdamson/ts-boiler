@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {getBalances, uploadKycIdentification, uploadKycLicense} from "../controllers/DriverController";
+import {getBalances, uploadKycIdentification, uploadKycLicense, withdrawBalance} from "../controllers/DriverController";
 import upload from "../configs/Upload";
 
 
@@ -17,6 +17,10 @@ router.post('/me/kyc/identification',
 
 router.get('/me/balance',
     getBalances
+);
+
+router.get('/me/withdraw',
+    withdrawBalance
 );
 
 

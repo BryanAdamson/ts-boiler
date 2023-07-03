@@ -2,8 +2,12 @@ import e, {Request, Response} from "express";
 import Order, {OrderDocument} from "../models/Order";
 import {send403, send404, send500, sendError, sendResponse} from "./BaseController";
 import Driver, {DriverDocument} from "../models/Driver";
-import {UserDocument} from "../models/User";
+import User, {UserDocument} from "../models/User";
 import OrderStatus from "../enums/OrderStatus";
+import paystack from "../configs/Paystack";
+import Paystack from "paystack";
+//import Customer, {CustomerDocument} from "../models/Customer";
+
 
 export const createOrder = async (req: Request, res: Response): Promise<e.Response> => {
     const data: OrderDocument = req.body;
@@ -49,7 +53,8 @@ export const createOrder = async (req: Request, res: Response): Promise<e.Respon
                 size: order.size,
                 price: order.price + "NGN",
                 distance: order.distance + "KM",
-            }
+            },
+            201
         )
 
     } catch (e) {
@@ -155,5 +160,71 @@ export const completeOrder = async (req: Request, res: Response): Promise<e.Resp
         );
     } catch (e) {
         return send500(res, e);
+    }
+}
+
+export const payForOrder = async (req: Request, res: Response): Promise<e.Response> => {
+    const order: OrderDocument | null = await Order.findById(req.params.orderId);
+    // if (!order || order.customer?.id !== (req.user as UserDocument).id
+    //     // || order.status === OrderStatus.CO
+    // )
+    // {
+    //     return send404(res);
+    // }
+
+    const user: UserDocument | null = await User.findById(order?.customer?.id);
+
+    // const customer: CustomerDocument | null = await Customer.findOne({user: order?.customer?.id})
+
+    const driver: DriverDocument | null = await Driver.findOne({user: order?.driver})
+    if (!driver) {
+        return send404(res);
+    }
+
+    try {
+        let response: Paystack.Response = await paystack.transaction.initialize({
+            amount: req.body.amount * 100,
+            email: user?.email as string,
+            reference: order?.id,
+            name: user?.displayName as string,
+        });
+
+
+        return sendResponse(
+            res,
+            response.message,
+            response.data,
+            200
+        )
+    } catch (e) {
+        return send500(res, e);
+    }
+}
+
+export const verifyOrderPayment = async (req: Request): Promise<undefined>=> {
+    const order: OrderDocument | null = await Order.findById(req.query.reference);
+    if (!order) {
+        return;
+    }
+
+    const driver: DriverDocument | null = await Driver.findOne({user: order.driver})
+    if (!driver) {
+        return;
+    }
+
+    try {
+        let response: Paystack.Response = await paystack.transaction.verify(req.query.reference as string);
+
+        if (!response.status || response.data.status !== "successful") {
+            return;
+        }
+
+        driver.balance = (driver.balance as number) + (response.data.amount as number);
+        await driver.save();
+
+        return;
+    } catch (e) {
+        console.error(e);
+        return;
     }
 }

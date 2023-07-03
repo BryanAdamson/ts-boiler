@@ -1,5 +1,12 @@
 import {Router} from "express";
-import {acceptOrder, cancelOrder, completeOrder, createOrder, getOrder} from "../controllers/OrderController";
+import {
+    acceptOrder,
+    cancelOrder,
+    completeOrder,
+    createOrder,
+    getOrder, payForOrder,
+    rejectOrder
+} from "../controllers/OrderController";
 import {body, param} from "express-validator";
 import mongoose from "mongoose";
 import {isLatitude, isLongitude} from "class-validator";
@@ -68,7 +75,7 @@ router.post('/:orderId/reject',
             .custom(value => mongoose.isValidObjectId(value)),
     ],
     validate,
-    acceptOrder
+    rejectOrder
 )
 
 router.post('/:orderId/cancel',
@@ -91,6 +98,17 @@ router.post('/:orderId/complete',
     ],
     validate,
     completeOrder
+)
+
+router.post('/:orderId/pay',
+    customers,
+    [
+        param('orderId', "orderId is invalid")
+            .notEmpty().withMessage("orderId is required")
+            .custom(value => mongoose.isValidObjectId(value)),
+    ],
+    validate,
+    payForOrder
 )
 
 export default router;

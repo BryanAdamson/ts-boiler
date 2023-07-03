@@ -1,9 +1,11 @@
 import e, {Request, Response} from "express";
 import Driver, {DriverDocument} from "../models/Driver";
 import {UserDocument} from "../models/User";
-import {send403, sendError, sendResponse} from "./BaseController";
+import {send403, send404, send500, sendError, sendResponse} from "./BaseController";
 import {aquayarPercentage} from "../utils/constants";
 import cloudinary from "../configs/Cloudinary";
+import paystack from "../configs/Paystack";
+import Paystack from "paystack";
 
 export const getBalances = async (req: Request, res: Response): Promise<e.Response> => {
     const driver: DriverDocument | null = await Driver.findOne({user: (req.user as UserDocument).id});
@@ -83,5 +85,31 @@ export const uploadKycIdentification = async (req: Request, res: Response): Prom
         )
     } catch (e) {
         return sendError(res, e);
+    }
+}
+
+export const withdrawBalance = async (req: Request, res: Response): Promise<e.Response> => {
+    const driver: DriverDocument | null = await Driver.findOne({user: (req.user as UserDocument).id});
+    if (!driver) {
+        return send404(res);
+    }
+
+    try {
+        const response: Paystack.Response & { data: any[] } = await paystack.misc.list_banks({
+            perPage: 10,
+            page: 1
+        });
+
+
+        // driver.balance = 0;
+        // await driver.save();
+
+        return sendResponse(
+            res,
+            "good",
+            response
+        )
+    } catch (e) {
+        return send500(res, e);
     }
 }
