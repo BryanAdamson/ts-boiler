@@ -24,10 +24,12 @@ export const getBalances = async (req: Request, res: Response): Promise<e.Respon
     )
 }
 
-export const uploadKycLicense = async (req: Request, res: Response): Promise<e.Response> => {
+export const uploadKyc = async (req: Request, res: Response): Promise<e.Response> => {
     if (!req.file) {
         return sendError(res);
     }
+
+    const type: string = req.params.type;
 
     const driver: DriverDocument | null = await Driver.findOne({user: (req.user as UserDocument).id});
     if (!driver) {
@@ -37,50 +39,23 @@ export const uploadKycLicense = async (req: Request, res: Response): Promise<e.R
     try {
         const upload: cloudinary.UploadApiResponse = await cloudinary.v2.uploader.upload(req.file.path, {
             folder: "drivers/"+ driver?.id +"/kyc",
-            filename_override: "license",
+            filename_override: type,
             use_filename: true
         });
 
-        driver.kyc.license = upload.secure_url;
+        if (type === "license") driver.kyc.license = upload.secure_url;
+        if (type === "selfie") driver.kyc.selfie = upload.secure_url;
+        if (type === "interior") driver.kyc.interior = upload.secure_url;
+        if (type === "exterior") driver.kyc.exterior = upload.secure_url;
+        if (type === "pump") driver.kyc.pump = upload.secure_url;
+
         await driver.save()
 
         return sendResponse(
             res,
-            'license uploaded',
+            `${type} uploaded`,
             {
-                licenseUrl: upload.secure_url
-            }
-        )
-    } catch (e) {
-        return sendError(res, e);
-    }
-}
-
-export const uploadKycIdentification = async (req: Request, res: Response): Promise<e.Response> => {
-    if (!req.file) {
-        return sendError(res);
-    }
-
-    const driver: DriverDocument | null = await Driver.findOne({user: (req.user as UserDocument).id});
-    if (!driver) {
-        return send403(res);
-    }
-
-    try {
-        const upload: cloudinary.UploadApiResponse = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: "drivers/"+ driver?.id,
-            filename_override: "identification",
-            use_filename: true
-        });
-
-        driver.kyc.identification = upload.secure_url;
-        await driver.save()
-
-        return sendResponse(
-            res,
-            'identification uploaded',
-            {
-                identificationUrl: upload.secure_url
+                fileUrl: upload.secure_url
             }
         )
     } catch (e) {

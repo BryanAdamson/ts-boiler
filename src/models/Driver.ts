@@ -9,9 +9,15 @@ export type DriverDocument = Document & {
     user?: ObjectId
     location?: LocationDocument;
     balance?: number;
+    tankerSize?: number;
+    licenseNumber?: string;
     kyc: {
         license?: string;
         identification?: string;
+        selfie?: string;
+        interior?: string;
+        exterior?: string;
+        pump?: string;
     }
 };
 
@@ -51,7 +57,33 @@ const DriverSchema = new Schema<DriverDocument>({
         identification: {
             type: String,
             required: false,
-        }
+        },
+        selfie: {
+            type: String,
+            required: false,
+        },
+        interior: {
+            type: String,
+            required: false,
+        },
+        exterior: {
+            type: String,
+            required: false,
+        },
+        pump: {
+            type: String,
+            required: false,
+        },
+    },
+    licenseNumber: {
+        type: String,
+        allowNull: true,
+        default: null
+    },
+    tankerSize: {
+        type: String,
+        allowNull: true,
+        default: null
     },
     user: {
         type: mongoose.Types.ObjectId,
