@@ -14,21 +14,6 @@ import {
 
 const router: Router = Router();
 
-
-// router.get(
-//     "/google/token",
-//     passport.authenticate("google-oauth-token"),
-//     getToken
-// );
-//
-//
-// router.get("/google/callback",
-//     passport.authenticate("google"),
-//     (req: Request, res: Response) => {
-//         res.redirect("/api/auth/user");
-//     }
-// );
-
 router.post('/sign-up/google',
     [
         body('profileId', "profileId is invalid")
@@ -63,7 +48,7 @@ router.post('/sign-up',
             .trim(),
         body('type', "type is invalid")
             .optional()
-            .isIn(["customer", "driver", "admin"])
+            .isIn(["basic", "admin"])
     ],
     validate,
     signUp

@@ -1,6 +1,5 @@
 enum UserType {
-    C = "customer",
-    D = "driver",
+    B = "basic",
     A = "admin"
 }
 

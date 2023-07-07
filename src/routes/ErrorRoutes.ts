@@ -1,5 +1,5 @@
 import {Request, Response, Router} from "express";
-import {send401, send403, send404, send500, sendError} from "../controllers/BaseController";
+import {send401, send403, send404, send500, sendError} from "../controllers/ResponseController";
 
 const router = Router();
 

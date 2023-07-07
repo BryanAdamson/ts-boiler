@@ -6,15 +6,6 @@ import {isEmail, isMobilePhone} from "class-validator";
 
 const Schema = mongoose.Schema;
 
-export type LocationDocument = Document & {
-    address?: string;
-    city?: string;
-    name?: string;
-    tankSize?: string;
-    longitude?: string
-    latitude?: string
-};
-
 export type UserDocument = Document & {
     displayName?: string;
     gender?: string;
@@ -72,7 +63,7 @@ const UserSchema = new Schema<UserDocument>({
     type: {
         type: String,
         enum: UserType,
-        default: UserType.C
+        default: UserType.B
     },
     gender: {
         type: String,

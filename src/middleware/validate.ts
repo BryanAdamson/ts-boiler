@@ -1,6 +1,6 @@
 import e, {NextFunction, Request, Response} from "express";
 import {Result, validationResult} from "express-validator";
-import {sendError} from "../controllers/BaseController";
+import {sendError} from "../controllers/ResponseController";
 
 const validate = (req: Request, res: Response, next: NextFunction): void | e.Response => {
     const errors: Result = validationResult(req)

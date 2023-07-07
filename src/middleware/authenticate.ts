@@ -1,6 +1,6 @@
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import e, { Request, Response, NextFunction } from 'express';
-import {send401} from "../controllers/BaseController";
+import {send401} from "../controllers/ResponseController";
 import {jwtSecret} from "../utils/constants";
 import User, {UserDocument} from "../models/User";
 

@@ -6,17 +6,9 @@ import "./configs/Passport";
 import passport from "passport";
 import ErrorRoutes from "./routes/ErrorRoutes";
 import UserRoutes from "./routes/UserRoutes";
-import CustomerRoutes from "./routes/CustomerRoutes";
-import OrderRoutes from "./routes/OrderRoutes";
-import customers from "./middleware/customers";
 import authenticate from "./middleware/authenticate";
 import session from "express-session";
 import createMemoryStore from "memorystore";
-import admins from "./middleware/admins";
-import AdminRoutes from "./routes/AdminRoutes";
-import DriverRoutes from "./routes/DriverRoutes";
-import drivers from "./middleware/drivers";
-import BaseRoutes from "./routes/BaseRoutes";
 
 const app: Express = express();
 
@@ -33,6 +25,8 @@ app.use(session({
         checkPeriod: 86400000
     })
 }));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -44,15 +38,8 @@ mongoose.connect(mongoURI, {})
 app.use("/api/errors", ErrorRoutes);
 app.use("/api/auth", AuthRoutes);
 app.use("/api/users", authenticate, UserRoutes);
-app.use("/api/customers", authenticate, customers, CustomerRoutes);
-app.use("/api/drivers", authenticate, drivers, DriverRoutes);
-app.use("/api/orders", authenticate, OrderRoutes);
-
-app.use("/", BaseRoutes)
-
-app.use("/api/admins", authenticate, admins, AdminRoutes);
 
 
 app.listen(port, () => {
-    console.log("app listening on port: " + port);
+    console.log("app is running on port: " + port);
 });

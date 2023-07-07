@@ -1,34 +1,11 @@
 import e, { Request, Response } from "express"
-import {send401, send403, send404, send500, sendError, sendResponse} from "./BaseController";
+import {send401, send403, send404, send500, sendError, sendResponse} from "./ResponseController";
 import bcrypt from "bcrypt";
 import User, {UserDocument} from "../models/User";
 import {addMinutesToDate, generateRandomInt, generateUserJWT, sendSMS} from "../utils/helpers";
 import jwt, {JwtPayload} from "jsonwebtoken";
 import {jwtSecret} from "../utils/constants";
-import Customer from "../models/Customer";
-import Driver from "../models/Driver";
 
-
-
-export const getToken = (req: Request, res: Response): e.Response => {
-    const user: Express.User | undefined = req.user;
-    if (!user) {
-        return send401(res);
-    }
-
-    return sendResponse(
-        res,
-        'login successful',
-        {
-            user:{
-                id: (user as UserDocument).id,
-                type: (user as UserDocument).type,
-            },
-            token: generateUserJWT(user as UserDocument)
-        },
-        200
-    );
-}
 
 export const signInWithGoogle = async (req: Request, res: Response): Promise<e.Response> => {
     const {profileId} = req.body;
@@ -106,13 +83,6 @@ export const signUpWithGoogle = async (req: Request, res: Response): Promise<e.R
             type: type || "customer",
         });
 
-        if (type === "driver") {
-            await Driver.create({user: user.id});
-        }
-        if (type === "customer") {
-            await Customer.create({user: user.id});
-        }
-
         return sendResponse(
             res,
             'signup successful',
@@ -158,16 +128,8 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
 
     try {
         user = await User.create({
-            ...data,
-            isSuspended: data.type === "driver"
+            ...data
         });
-
-        if (data.type === "driver") {
-            await Driver.create({user: user.id});
-        }
-        if (data.type === "customer") {
-            await Customer.create({user: user.id});
-        }
 
         return sendResponse(
             res,

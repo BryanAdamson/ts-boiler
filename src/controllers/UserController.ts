@@ -1,9 +1,7 @@
 import e, {Request, Response} from "express";
-import {send404, send500, sendError, sendResponse} from "./BaseController";
+import {send404, send500, sendError, sendResponse} from "./ResponseController";
 import User, {UserDocument} from "../models/User";
 import {addMinutesToDate, generateRandomInt, sendSMS} from "../utils/helpers";
-import UserType from "../enums/UserType";
-import Driver, {DriverDocument} from "../models/Driver";
 
 export const getMe = (req: Request, res: Response): e.Response => {
     const user: UserDocument = req.user as UserDocument;
@@ -25,7 +23,7 @@ export const getMe = (req: Request, res: Response): e.Response => {
 }
 
 export const updateMyInfo = async (req: Request, res: Response): Promise<e.Response> => {
-    const data: UserDocument | DriverDocument = req.body;
+    const data: UserDocument = req.body;
 
     const user: UserDocument | null = await User.findById((req.user as UserDocument).id);
     if (!user) {
@@ -39,15 +37,6 @@ export const updateMyInfo = async (req: Request, res: Response): Promise<e.Respo
         if (uDoc.password) user.password = uDoc.password;
 
         await user.save();
-
-        if (user.type === UserType.D) {
-            const dDoc: DriverDocument = data as DriverDocument;
-            const driver: DriverDocument | null = await Driver.findOne({user: user.id});
-            if (driver){
-                driver.tankerSize = dDoc.tankerSize || driver.tankerSize;
-                driver.licenseNumber = dDoc.licenseNumber || driver.licenseNumber;
-            }
-        }
 
         const success = {
             id: user.id,
