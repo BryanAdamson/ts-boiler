@@ -1,8 +1,8 @@
-# HireMe 3MTT Build
+# TS boiler
 
 ## Getting Started
 #### First Clone the project from GitHub with:
-    git clone https://github.com/HireMe-Network/hireme-3mtt-be.git
+    git clone https://github.com/BryanAdamson/ts-boiler.git
 #### Now open the cloned project in vscode or any IDE of your choice and run:
     npm install
 #### Create a .env file
@@ -41,7 +41,19 @@ Holds interface declarations. We keep interfaces in separate files.
 This folder holds any middleware functions you want ran before the request hits your controller. For example, have an ```authenticate.ts``` file that holds a middleware function that helps us pass information about the current user.
 
 ### /migrations
-This is where migration files are kept. Migrations are necessary to keep the db up to date.
+This is where migration files are kept. Migrations are necessary to keep the db up to date. This project uses the ```ts-migrate-mongoose``` package.   
+  
+To create a migration, run:  
+
+    migrate create <name of migrartion>  
+To run a migration, run:
+
+    migrate up <name of migrartion>  
+To reverse a migration, run:
+
+    migrate down <name of migrartion>
+
+
 
 ### /models
 Model files can get a little complicated, as they hold type definitions for the model being defined.  
@@ -52,8 +64,12 @@ These are the route declarations. This is where the middlewares you may have def
 
 ### /utils
 This is where most miscellaneous code goes. There are 2 major files in this folder, namely:
-
 #### constants.ts
 Holds global constants to be used throughout the system.
 #### helpers.ts
 Holds globally used functions.
+
+### /views
+This is where ejs templates go.
+
+

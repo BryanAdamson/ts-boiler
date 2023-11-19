@@ -1,5 +1,6 @@
 import express, {Express} from "express";
 import {cookieSecret, mongoURI, port} from "./utils/constants";
+import cors from "cors";
 import mongoose from "mongoose";
 import AuthRoutes from "./routes/AuthRoutes";
 import "./configs/Passport";
@@ -9,11 +10,14 @@ import UserRoutes from "./routes/UserRoutes";
 import authenticate from "./middleware/authenticate";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import upload from "./configs/Multer";
 
 const app: Express = express();
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.use(cors({origin: "*"}));
 
 const MemoryStore = createMemoryStore(session)
 
@@ -34,7 +38,7 @@ mongoose.connect(mongoURI, {})
     .then(() => console.log("mongodb is running."))
     .catch(e => console.error(e));
 
-
+app.use("/api", upload.any());
 app.use("/api/errors", ErrorRoutes);
 app.use("/api/auth", AuthRoutes);
 app.use("/api/users", authenticate, UserRoutes);
