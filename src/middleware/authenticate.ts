@@ -14,7 +14,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction): Pr
     let payload: JwtPayload | string;
     try {
         payload = jwt.verify(token, jwtSecret);
-        if (!payload || (payload as JwtPayload).iss !== "AquayarAuthDev") {
+        if (!payload || (payload as JwtPayload).iss !== "BoilerAuthDev") {
             return send401(res);
         }
     } catch (e) {
