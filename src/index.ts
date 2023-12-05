@@ -2,15 +2,12 @@ import express, {Express} from "express";
 import {cookieSecret, mongoURI, port} from "./utils/constants";
 import cors from "cors";
 import mongoose from "mongoose";
-import AuthRoutes from "./routes/AuthRoutes";
 import "./configs/Passport";
 import passport from "passport";
-import ErrorRoutes from "./routes/ErrorRoutes";
-import UserRoutes from "./routes/UserRoutes";
-import authenticate from "./middleware/authenticate";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import upload from "./configs/Multer";
+import routes from "./routes";
 
 const app: Express = express();
 
@@ -38,11 +35,7 @@ mongoose.connect(mongoURI, {})
     .then(() => console.log("mongodb is running."))
     .catch(e => console.error(e));
 
-app.use("/api", upload.any());
-app.use("/api/errors", ErrorRoutes);
-app.use("/api/auth", AuthRoutes);
-app.use("/api/users", authenticate, UserRoutes);
-
+app.use("/", upload.any(), routes);
 
 app.listen(port, () => {
     console.log("app is running on port: " + port);
