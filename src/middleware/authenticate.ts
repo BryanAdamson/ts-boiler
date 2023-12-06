@@ -22,7 +22,7 @@ const authenticate = async (req: Request, res: Response, next: NextFunction): Pr
     }
 
     const user: UserDocument | null = await User.findById((payload as UserDocument).id);
-    if (!user) {
+    if (!user || user.token !== token) {
         return send401(res);
     }
 

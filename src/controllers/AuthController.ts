@@ -18,6 +18,9 @@ export const signInWithGoogle = async (req: Request, res: Response): Promise<e.R
         return send403(res)
     }
 
+    user.token = generateUserJWT(user);
+    await user.save();
+
     return sendResponse(
         res,
         'signin successful',
@@ -26,7 +29,7 @@ export const signInWithGoogle = async (req: Request, res: Response): Promise<e.R
                 id: user.id,
                 type: user.type,
             },
-            token: generateUserJWT(user)
+            token: user.token
         },
         200
     );
@@ -48,6 +51,9 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
         return send401(res);
     }
 
+    user.token = generateUserJWT(user);
+    await user.save();
+
     return sendResponse(
         res,
         'signin successful',
@@ -56,7 +62,7 @@ export const signIn = async (req: Request, res: Response): Promise<e.Response> =
                 id: user.id,
                 type: user.type,
             },
-            token: generateUserJWT(user)
+            token: user.token
         },
         200
     );
@@ -80,8 +86,11 @@ export const signUpWithGoogle = async (req: Request, res: Response): Promise<e.R
             email: email,
             googleId: profileId,
             displayName: displayName,
-            type: type || "customer",
+            type: type || "basic",
         });
+
+        user.token = generateUserJWT(user);
+        await user.save();
 
         return sendResponse(
             res,
@@ -91,7 +100,7 @@ export const signUpWithGoogle = async (req: Request, res: Response): Promise<e.R
                     id: user.id,
                     type: user.type,
                 },
-                token: generateUserJWT(user)
+                token: user.token
             },
             200
         );
@@ -131,6 +140,9 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
             ...data
         });
 
+        user.token = generateUserJWT(user);
+        await user.save();
+
         return sendResponse(
             res,
             "signup successful",
@@ -139,7 +151,7 @@ export const signUp = async (req: Request, res: Response): Promise<e.Response> =
                     id: user.id,
                     type: user.type,
                 },
-                token: generateUserJWT(user)
+                token: user.token
             },
             201
         );
@@ -268,7 +280,8 @@ export const resetPassword = async (req: Request, res: Response): Promise<e.Resp
 
     try {
         user.password = password;
-        await user.save()
+        user.token = generateUserJWT(user);
+        await user.save();
 
         return sendResponse(
             res,
@@ -278,7 +291,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<e.Resp
                     id: user.id,
                     type: user.type,
                 },
-                token: generateUserJWT(user)
+                token: user.token
             },
         );
     } catch (e) {

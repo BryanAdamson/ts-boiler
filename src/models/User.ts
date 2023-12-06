@@ -90,6 +90,9 @@ const UserSchema = new Schema<UserDocument>({
             default: false
         }
     },
+    token: {
+        type: String
+    },
     isSuspended: {
         type: Boolean,
         default: false

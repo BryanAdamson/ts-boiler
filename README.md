@@ -1,4 +1,5 @@
 # TS boiler
+This is a Typescript boiler plate using expressJs, MongoDB, and Jest for testing.
 
 ## Getting Started
 #### First Clone the project from GitHub with:
@@ -18,12 +19,12 @@ Controller:     UserController.ts
 Route:          UserRoute.ts
 ```
 Also, note that this code based is primarily function based, and uses camelCase predominantly throughout. We use PascalCase for model, interface, type, and enum definitions.
-
+## /src
 ### index.ts
 This is where the server logic is. Essentially, the entryway for the application.
 
 ### /configs
-This folder holds configuration logic for most third-party packages. Each package gets its own configuration file.
+This folder holds configuration logic for most third-party packages. Each package gets its own configuration file. It also holds the App configuration.
 
 ### /controllers
 The controllers for the application exist here. We try to make sure to follow a logical grouping for the different functions.
@@ -72,4 +73,9 @@ Holds globally used functions.
 ### /views
 This is where ejs templates go.
 
+## /tests
+The tests for this project go here. This project uses Jest to handle Unit/Integration tests. The database connection logic to be used during tests is in the index.ts file.  
 
+To run your tests, run:
+
+    npm run test
